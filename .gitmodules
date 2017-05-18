@@ -1,4 +1,5 @@
 [submodule "fpga-src"]
 	path = fpga-src
-	url = https://github.com/EttusResearch/fpga.git
+	url = git@github.com:selinux/fpga.git
+	push = git@github.com:selinux/fpga.git
 	branch = master

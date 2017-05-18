@@ -84,8 +84,8 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     usrp->set_rx_rate(rate);
     std::cout << boost::format("Actual RX Rate: %f Msps...") % (usrp->get_rx_rate()/1e6) << std::endl << std::endl;
 
-    std::cout << boost::format("Setting device timestamp to 0...") << std::endl;
-    usrp->set_time_now(uhd::time_spec_t(0.0));
+    std::cout << boost::format("Setting device timestamp to 100.350...") << std::endl;
+    usrp->set_time_now(uhd::time_spec_t(100.350));
 
     //create a receive streamer
     uhd::stream_args_t stream_args("fc32", wire); //complex floats
@@ -134,8 +134,8 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         }
 
         if(verbose) std::cout << boost::format(
-            "Received packet: %u samples, %u full secs, %f frac secs"
-        ) % num_rx_samps % md.time_spec.get_full_secs() % md.time_spec.get_frac_secs() << std::endl;
+            "Received packet: %u samples, %u full secs, %f frac secs, %ld tics"
+        ) % num_rx_samps % md.time_spec.get_full_secs() % md.time_spec.get_frac_secs() % md.time_spec.get_tick_count(10000000000000) << std::endl;
 
         num_acc_samps += num_rx_samps;
     }
