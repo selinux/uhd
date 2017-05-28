@@ -2,3 +2,10 @@ debian
 *~
 *swp
 *.pyc
+
+**/build/*
+**/build-t440p/*
+**/build-hepia/*
+**/build-i7/*
+**/.idea/*
+**/cmake-build-debug/*
