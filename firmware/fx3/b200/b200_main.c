@@ -1079,7 +1079,7 @@ void b200_slfifo_mode_gpio_config(void) {
 
     /* Initialize GPIO output values. */
     CyU3PGpioSetValue(GPIO_FPGA_RESET, 0);
-    CyU3PGpioSetValue(GPIO_SHDN_SW, 1);
+    CyU3PGpioSetValue(GPIO_SHDN_SW, 0);
     CyU3PGpioSetValue(GPIO_FX3_SCLK, 0);
     CyU3PGpioSetValue(GPIO_FX3_CE, 1);
     CyU3PGpioSetValue(GPIO_FX3_MOSI, 0);
