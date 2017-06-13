@@ -1098,6 +1098,11 @@ void b200_impl::sync_times()
     set_time(_radio_perifs[0].time64->get_time_now());
 }
 
+void b200_impl::lora_reg_write32(const uint32_t data)
+{
+    _local_ctrl->poke32(TOREG(SR_LORA_TRIG), data);
+}
+
 /***********************************************************************
  * GPIO setup
  **********************************************************************/
@@ -1245,4 +1250,9 @@ sensor_value_t b200_impl::get_fe_pll_locked(const bool is_tx)
     const uint32_t st = _local_ctrl->peek32(RB32_CORE_PLL);
     const bool locked = is_tx ? ((st & 0x1) > 0) : ((st & 0x2) > 0);
     return sensor_value_t("LO", locked, "locked", "unlocked");
+}
+
+void b200_impl::set_lora_trig(const uint32_t data)
+{
+    this->lora_reg_write32(data & 0x1);
 }

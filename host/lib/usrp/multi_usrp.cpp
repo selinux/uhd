@@ -545,6 +545,11 @@ public:
         }
     }
 
+    void set_lora_trig(const uint32_t data)
+    {
+        // method will be overwritten
+    }
+
     void set_time_next_pps(const time_spec_t &time_spec, size_t mboard){
         if (mboard != ALL_MBOARDS){
             _tree->access<time_spec_t>(mb_root(mboard) / "time/pps").set(time_spec);

@@ -232,6 +232,15 @@ public:
     virtual void set_time_now(const time_spec_t &time_spec, size_t mboard = ALL_MBOARDS) = 0;
 
     /*!
+     * Sets trigger to LoRa_detect module
+     *
+     * The vita_timestamp shall be saved in register when triggered
+     *
+     * \param data trigger (only lsb is used - data & 0x1)
+     */
+    virtual void set_lora_trig(const uint32_t data) = 0;
+
+    /*!
      * Set the time registers on the usrp at the next pps tick.
      * The values will not be latched in until the pulse occurs.
      * It is recommended that the user sleep(1) after calling to ensure

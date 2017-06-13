@@ -1,4 +1,11 @@
 !debian
 /build
+/build-t440p
+/build-hepia
 tags
 *~
+
+GPATH
+GRTAGS
+GTAGS
+

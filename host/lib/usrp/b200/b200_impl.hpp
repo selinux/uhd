@@ -124,6 +124,9 @@ public:
     // uhd::value_error.
     void check_streamer_args(const uhd::stream_args_t &args, double tick_rate, const std::string &direction = "");
 
+    //Publics LoRa's registers
+    void set_lora_trig(const uint32_t data);
+
 private:
     b200_product_t  _product;
     size_t          _revision;
@@ -175,6 +178,8 @@ private:
     void update_antenna_sel(const size_t which, const std::string &ant);
     uhd::sensor_value_t get_ref_locked(void);
     uhd::sensor_value_t get_fe_pll_locked(const bool is_tx);
+
+    void lora_reg_write32(const uint32_t data);
 
     //perifs in the radio core
     struct radio_perifs_t

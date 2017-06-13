@@ -40,6 +40,9 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <complex>
+#include "../lib/usrp/cores/user_settings_core_3000.hpp"
+
+#define NB_TESTS 60
 
 namespace po = boost::program_options;
 
@@ -48,7 +51,10 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 
     //variables to be set by po
     std::string args;
+    std::string args_board0 = "name=hepiaB200";
+    std::string args_board1 = "name=sinuxB200";
     std::string wire;
+    int test_time = 0;
 
     std::string time_source;
 
@@ -79,47 +85,107 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         return ~0;
     }
 
-    bool verbose = vm.count("dilv") == 0;
+//    bool verbose = vm.count("dilv") == 0;
 
-    //create a usrp device
+    //create first usrp device
     std::cout << std::endl;
-    std::cout << boost::format("Creating the usrp device with: %s...") % args << std::endl;
-    uhd::usrp::multi_usrp::sptr usrp = uhd::usrp::multi_usrp::make(args);
-    std::cout << boost::format("Using Device: %s") % usrp->get_pp_string() << std::endl;
+    std::cout << boost::format("Creating the usrp device with: %s...") % args_board0 << std::endl;
+    uhd::usrp::multi_usrp::sptr usrp0 = uhd::usrp::multi_usrp::make(args_board0);
+    std::cout << boost::format("Using Device: %s") % usrp0->get_pp_string() << std::endl;
+    //create second usrp device
+    std::cout << std::endl;
+    std::cout << boost::format("Creating the usrp device with: %s...") % args_board1 << std::endl;
+    uhd::usrp::multi_usrp::sptr usrp1 = uhd::usrp::multi_usrp::make(args_board1);
+    std::cout << boost::format("Using Device: %s") % usrp1->get_pp_string() << std::endl;
 
     //detect which channels to use
-    std::vector<std::string> channel_strings;
     std::vector<size_t> channel_nums;
-    boost::split(channel_strings, channel_list, boost::is_any_of("\"',"));
-    for(size_t ch = 0; ch < channel_strings.size(); ch++){
-        size_t chan = boost::lexical_cast<int>(channel_strings[ch]);
-        if(chan >= usrp->get_tx_num_channels() or chan >= usrp->get_rx_num_channels()){
-            throw std::runtime_error("Invalid channel(s) specified.");
-        }
-        else channel_nums.push_back(boost::lexical_cast<int>(channel_strings[ch]));
-    }
+    channel_nums.push_back(boost::lexical_cast<int>(0));
+
+    //create a receive streamer
+    uhd::stream_args_t stream_args("fc32", wire); //complex floats
+    stream_args.channels = channel_nums;
+    uhd::rx_streamer::sptr rx_stream0 = usrp0->get_rx_stream(stream_args);
+    uhd::rx_streamer::sptr rx_stream1 = usrp1->get_rx_stream(stream_args);
+
+    //setup streaming
+    std::cout << std::endl;
+    std::cout << boost::format(
+        "Begin streaming %u samples, %f seconds in the future..."
+    ) % total_num_samps % seconds_in_future << std::endl;
+    uhd::stream_cmd_t stream_cmd(uhd::stream_cmd_t::STREAM_MODE_NUM_SAMPS_AND_DONE);
+    stream_cmd.num_samps = total_num_samps;
+    stream_cmd.stream_now = true;
+//    stream_cmd.time_spec = uhd::time_spec_t(seconds_in_future);
+    rx_stream0->issue_stream_cmd(stream_cmd);
+    rx_stream1->issue_stream_cmd(stream_cmd);
+
+
+    //allocate buffer to receive with samples
+    std::vector<std::complex<float> > buff0(rx_stream0->get_max_num_samps());  // sample are overwritten anyway
+    std::vector<std::complex<float> > buff1(rx_stream1->get_max_num_samps());  // sample are overwritten anyway
+    std::vector<void *> buffs;
+    buffs.push_back(&buff0.front()); //same buffer for each channel
+    buffs.push_back(&buff1.front()); //same buffer for each channel
+
+    //meta-data will be filled in by recv()
+    uhd::rx_metadata_t md0;
+    uhd::rx_metadata_t md1;
 
     //set the rx sample rate
     std::cout << boost::format("Setting RX Rate: %f Msps...") % (rate/1e6) << std::endl;
-    usrp->set_rx_rate(rate);
-    std::cout << boost::format("Actual RX Rate: %f Msps...") % (usrp->get_rx_rate()/1e6) << std::endl << std::endl;
+    usrp0->set_rx_rate(rate);
+    usrp1->set_rx_rate(rate);
+    std::cout << boost::format("Actual hepiaB200 RX Rate: %f Msps...") % (usrp0->get_rx_rate()/1e6) << std::endl << std::endl;
+    std::cout << boost::format("Actual sinuxB200 RX Rate: %f Msps...") % (usrp1->get_rx_rate()/1e6) << std::endl << std::endl;
 
-    std::cout << boost::format("Setting device timestamp to 100.350...") << std::endl;
-    usrp->set_time_now(uhd::time_spec_t(100.350));
+    usrp0->set_time_source("external");
+    usrp1->set_time_source("external");
 
-    //sleep off if gpsdo detected and time next pps already set
-    boost::this_thread::sleep(boost::posix_time::seconds(1));
+    std::cout << boost::format("Setting device timestamp to 100.000...") << std::endl;
+    usrp0->set_time_now(uhd::time_spec_t(100.000));
+    usrp1->set_time_now(uhd::time_spec_t(100.000));
 
-    usrp->set_time_source("external");
+    size_t num_acc_samps = 0; //number of accumulated samples
+//    while(num_acc_samps < total_num_samps){
+    while(test_time++ < NB_TESTS) {
+        //sleep off if gpsdo detected and time next pps already set
+        //boost::this_thread::sleep(boost::posix_time::seconds(1));
 
-    std::cout << boost::format("Last PPS: %f ") %  (usrp->get_time_last_pps().get_real_secs()*1e6) << std::endl << std::endl;
+        //receive a single packet
+        size_t num_rx_samps0 = rx_stream0->recv(
+                buffs, buff0.size(), md0, 0.1, true);
+        size_t num_rx_samps1 = rx_stream1->recv(
+                buffs, buff1.size(), md1, 0.1, true);
+
+
+        uhd::time_spec_t now0 = usrp0->get_time_now();
+        uhd::time_spec_t now1 = usrp1->get_time_now();
+
+        std::cout << boost::format( "Actual hepiaB200 time : %f s")
+                     % (now0.get_real_secs()*1e1) << std::endl;
+
+        std::cout << boost::format( "Actual sinuxB200 time : %f s")
+                     % (now1.get_real_secs()*1e1) << std::endl;
+
+        std::cout << boost::format( "Difference : %f us" ) % ((now1.get_real_secs() - now0.get_real_secs())*1e6)  << std::endl;
+//        std::cout << boost::format( "Actual hepiaB200 time : %u samples, %u full secs, %f frac secs, %ld tics")
+//                     % num_rx_samps1 % md1.time_spec.get_full_secs() % md1.time_spec.get_frac_secs() % md1.time_spec.get_tick_count(10000000000000) << std::endl;
+//
+        num_acc_samps += num_rx_samps0;
+    }
+
+    std::cout << boost::format("Last PPS: %f ") %  (usrp1->get_time_last_pps().get_real_secs()*1e6) << std::endl << std::endl;
 
     //finished
     std::cout << std::endl << "Done!" << std::endl << std::endl;
 
+//    usrp0->set_user_register(0x8, 0x32, uhd::usrp::multi_usrp::ALL_MBOARDS);
+    usrp0->set_lora_trig(10);
+
     //set the time at an unknown pps (will throw if no pps)
     std::cout << std::endl << "Attempt to detect the PPS and set the time..." << std::endl << std::endl;
-    usrp->set_time_unknown_pps(uhd::time_spec_t(0.0));
+    usrp1->set_time_unknown_pps(uhd::time_spec_t(0.0));
     std::cout << std::endl << "Success!" << std::endl << std::endl;
 
     return EXIT_SUCCESS;
