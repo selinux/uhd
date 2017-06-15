@@ -617,3 +617,7 @@ void b100_impl::set_tx_fe_corrections(const double lo_freq){
         apply_tx_fe_corrections(this->get_tree()->subtree("/mboards/0"), "A", lo_freq);
     }
 }
+
+void b100_impl::test_lora_reg_write32(const uint32_t data) {
+
+}

@@ -301,6 +301,9 @@ octoclock_impl::octoclock_impl(const device_addr_t &_device_addr){
                              ;
     }
 }
+void octoclock_impl::test_lora_reg_write32(const uint32_t data)
+{
+}
 
 rx_streamer::sptr octoclock_impl::get_rx_stream(UHD_UNUSED(const stream_args_t &args)){
     throw uhd::not_implemented_error("This function is incompatible with this device.");

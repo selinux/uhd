@@ -585,5 +585,7 @@ void n230_impl::_check_clock_source(std::string source)
             throw uhd::runtime_error("GPSDO clock source not available");
     }
 }
+            void n230_impl::test_lora_reg_write32(const uint32_t data) {
 
-}}} //namespace
+            }
+        }}} //namespace

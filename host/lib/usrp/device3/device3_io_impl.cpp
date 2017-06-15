@@ -501,6 +501,11 @@ void device3_impl::update_rx_streamers(double /* rate */)
     }
 }
 
+void device3_impl::test_lora_reg_write32(const uint32_t data)
+{
+
+}
+
 rx_streamer::sptr device3_impl::get_rx_stream(const stream_args_t &args_)
 {
     boost::mutex::scoped_lock lock(_transport_setup_mutex);

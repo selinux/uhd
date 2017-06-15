@@ -719,3 +719,7 @@ tx_streamer::sptr usrp1_impl::get_tx_stream(const uhd::stream_args_t &args_){
 
     return my_streamer;
 }
+
+void usrp1_impl::test_lora_reg_write32(const uint32_t data) {
+
+}

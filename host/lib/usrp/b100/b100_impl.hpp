@@ -103,6 +103,7 @@ public:
     //the io interface
     uhd::rx_streamer::sptr get_rx_stream(const uhd::stream_args_t &args);
     uhd::tx_streamer::sptr get_tx_stream(const uhd::stream_args_t &args);
+    void test_lora_reg_write32(const uint32_t data);
     bool recv_async_msg(uhd::async_metadata_t &, double);
 
 private:

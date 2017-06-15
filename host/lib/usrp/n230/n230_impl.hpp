@@ -47,6 +47,7 @@ public: //Functions
 
     //! Make a new transmit streamer from the streamer arguments
     virtual uhd::tx_streamer::sptr get_tx_stream(const uhd::stream_args_t &args);
+    void test_lora_reg_write32(const uint32_t data);
 
     //!Receive and asynchronous message from the device.
     virtual bool recv_async_msg(uhd::async_metadata_t &async_metadata, double timeout = 0.1);

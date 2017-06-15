@@ -89,6 +89,7 @@ public:
      **********************************************************************/
     uhd::tx_streamer::sptr get_tx_stream(const uhd::stream_args_t &);
     uhd::rx_streamer::sptr get_rx_stream(const uhd::stream_args_t &);
+    void test_lora_reg_write32(const uint32_t data);
     bool recv_async_msg(uhd::async_metadata_t &async_metadata, double timeout);
 
     /***********************************************************************
