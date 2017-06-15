@@ -71,5 +71,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     std::cout << std::endl << "Attempt to detect the PPS and set the time..." << std::endl << std::endl;
     usrp->set_time_unknown_pps(uhd::time_spec_t(0.0));
     std::cout << std::endl << "Success!" << std::endl << std::endl;
+    usrp->set_lora_trig(1);
+    usrp->set_rx_rate(10e3);
     return EXIT_SUCCESS;
 }

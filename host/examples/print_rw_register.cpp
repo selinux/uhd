@@ -3,7 +3,7 @@
  *
  *       Filename:  print_rw_register.cpp
  *
- *    Description:  test read/write acces to user setting register (LoRa)
+ *    Description:  test read/write access to user setting register (LoRa)
  *
  *        Version:  1.0
  *        Created:  28.05.2017 18:55:41
@@ -180,8 +180,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     //finished
     std::cout << std::endl << "Done!" << std::endl << std::endl;
 
-//    usrp0->set_user_register(0x8, 0x32, uhd::usrp::multi_usrp::ALL_MBOARDS);
-    usrp0->set_lora_trig(10);
+    usrp0->set_lora_trig(1);
 
     //set the time at an unknown pps (will throw if no pps)
     std::cout << std::endl << "Attempt to detect the PPS and set the time..." << std::endl << std::endl;
