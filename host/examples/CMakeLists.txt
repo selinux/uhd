@@ -20,6 +20,7 @@
 ########################################################################
 SET(example_sources
     benchmark_rate.cpp
+    debug_fpga_chipscope.cpp
     network_relay.cpp
     print_rw_register.cpp
     rx_multi_samples.cpp
