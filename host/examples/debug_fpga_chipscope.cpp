@@ -142,9 +142,11 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         uhd::time_spec_t now = usrp->get_time_now();
 
         std::cout << boost::format( "Actual sinuxB200 time : %f s")
-                     % (now.get_real_secs()*1e1) << std::endl;
+                     % (now.get_real_secs()*1e0) << std::endl;
 
+        usrp->set_lora_trig(7);
         usrp->set_lora_trig(1);
+        usrp->set_lora_trig(0);
 
         num_acc_samps += num_rx_samps;
     }
