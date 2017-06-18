@@ -116,6 +116,7 @@ public:
     uhd::rx_streamer::sptr get_rx_stream(const uhd::stream_args_t &args);
     uhd::tx_streamer::sptr get_tx_stream(const uhd::stream_args_t &args);
     bool recv_async_msg(uhd::async_metadata_t &, double);
+    void test_lora_reg_write32(const uint32_t data);
 
     //! Check that the combination of stream args and tick rate are valid.
     //
@@ -179,7 +180,6 @@ private:
     uhd::sensor_value_t get_ref_locked(void);
     uhd::sensor_value_t get_fe_pll_locked(const bool is_tx);
 
-    void lora_reg_write32(const uint32_t data);
 
     //perifs in the radio core
     struct radio_perifs_t

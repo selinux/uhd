@@ -547,6 +547,7 @@ public:
 
     void set_lora_trig(const uint32_t data)
     {
+        this->get_device()->test_lora_reg_write32(1);
         // method will be overwritten
     }
 
