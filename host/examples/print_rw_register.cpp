@@ -71,7 +71,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         ("wire", po::value<std::string>(&wire)->default_value(""), "the over the wire type, sc16, sc8, etc")
         ("secs", po::value<double>(&seconds_in_future)->default_value(1.5), "number of seconds in the future to receive")
         ("nsamps", po::value<size_t>(&total_num_samps)->default_value(10000), "total number of samples to receive")
-        ("rate", po::value<double>(&rate)->default_value(100e6/16), "rate of incoming samples")
+        ("rate", po::value<double>(&rate)->default_value(50e6), "rate of incoming samples")
         ("dilv", "specify to disable inner-loop verbose")
         ("channels", po::value<std::string>(&channel_list)->default_value("0"), "which channel(s) to use (specify \"0\", \"1\", \"0,1\", etc)")
     ;
@@ -136,8 +136,12 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     std::cout << boost::format("Setting RX Rate: %f Msps...") % (rate/1e6) << std::endl;
     usrp0->set_rx_rate(rate);
     usrp1->set_rx_rate(rate);
+    usrp0->set_rx_freq(868e6);
+    usrp1->set_rx_freq(868e6);
     std::cout << boost::format("Actual hepiaB200 RX Rate: %f Msps...") % (usrp0->get_rx_rate()/1e6) << std::endl << std::endl;
     std::cout << boost::format("Actual sinuxB200 RX Rate: %f Msps...") % (usrp1->get_rx_rate()/1e6) << std::endl << std::endl;
+    std::cout << boost::format("Actual hepiaB200 RX freq: %f MHz...") % (usrp0->get_rx_freq()/1e6) << std::endl << std::endl;
+    std::cout << boost::format("Actual sinuxB200 RX freq: %f MHz...") % (usrp1->get_rx_freq()/1e6) << std::endl << std::endl;
 
     usrp0->set_time_source("external");
     usrp1->set_time_source("external");
@@ -145,6 +149,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     std::cout << boost::format("Setting device timestamp to 100.000...") << std::endl;
     usrp0->set_time_now(uhd::time_spec_t(100.000));
     usrp1->set_time_now(uhd::time_spec_t(100.000));
+    usrp0->set_time_next_pps(uhd::time_spec_t());
 
     size_t num_acc_samps = 0; //number of accumulated samples
 //    while(num_acc_samps < total_num_samps){
@@ -163,10 +168,10 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         uhd::time_spec_t now1 = usrp1->get_time_now();
 
         std::cout << boost::format( "Actual hepiaB200 time : %f s")
-                     % (now0.get_real_secs()*1e1) << std::endl;
+                     % (now0.get_real_secs()*1e0) << std::endl;
 
         std::cout << boost::format( "Actual sinuxB200 time : %f s")
-                     % (now1.get_real_secs()*1e1) << std::endl;
+                     % (now1.get_real_secs()*1e0) << std::endl;
 
         std::cout << boost::format( "Difference : %f us" ) % ((now1.get_real_secs() - now0.get_real_secs())*1e6)  << std::endl;
 //        std::cout << boost::format( "Actual hepiaB200 time : %u samples, %u full secs, %f frac secs, %ld tics")

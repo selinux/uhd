@@ -40,7 +40,6 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <complex>
-#include "../lib/usrp/cores/user_settings_core_3000.hpp"
 
 #define NB_TESTS 60
 
@@ -70,7 +69,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         ("wire", po::value<std::string>(&wire)->default_value(""), "the over the wire type, sc16, sc8, etc")
         ("secs", po::value<double>(&seconds_in_future)->default_value(1.5), "number of seconds in the future to receive")
         ("nsamps", po::value<size_t>(&total_num_samps)->default_value(10000), "total number of samples to receive")
-        ("rate", po::value<double>(&rate)->default_value(100e6/16), "rate of incoming samples")
+        ("rate", po::value<double>(&rate)->default_value(50e6), "rate of incoming samples")
         ("dilv", "specify to disable inner-loop verbose")
         ("channels", po::value<std::string>(&channel_list)->default_value("0"), "which channel(s) to use (specify \"0\", \"1\", \"0,1\", etc)")
     ;
@@ -120,9 +119,11 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     uhd::rx_metadata_t md;
 
     //set the rx sample rate
-    std::cout << boost::format("Setting RX Rate: %f Msps...") % (rate/1e6) << std::endl;
+    std::cout << boost::format("Setting RX Rate: %f Msps...") % (50e6) << std::endl;
     usrp->set_rx_rate(rate);
-    std::cout << boost::format("Actual hepiaB200 RX Rate: %f Msps...") % (usrp->get_rx_rate()/1e6) << std::endl << std::endl;
+    std::cout << boost::format("Actual hepiaB200 RX Rate: %f Msps...") % (usrp->get_rx_rate()) << std::endl << std::endl;
+
+    usrp->set_user_register(0, 0xBEEF, uhd::usrp::multi_usrp::ALL_MBOARDS);
 
     usrp->set_time_source("external");
 
@@ -131,7 +132,7 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
 
     size_t num_acc_samps = 0; //number of accumulated samples
 //    while(num_acc_samps < total_num_samps){
-    while(test_time++ < NB_TESTS) {
+    while(true) {
         //sleep off if gpsdo detected and time next pps already set
         //boost::this_thread::sleep(boost::posix_time::seconds(1));
 

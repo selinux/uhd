@@ -72,8 +72,6 @@ int UHD_SAFE_MAIN(int argc, char *argv[])
             std::cout << "Synchronizing mboard " << mboard << ": " << usrp->get_mboard_name(mboard) << std::endl;
 
             //Set references to GPSDO
-            usrp->set_clock_source("gpsdo", mboard);
-            usrp->set_time_source("gpsdo", mboard);
 
             std::cout << std::endl;
             print_notes();
