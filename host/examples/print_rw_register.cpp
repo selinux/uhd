@@ -40,6 +40,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <complex>
+#include <chrono>
 #include "../lib/usrp/cores/user_settings_core_3000.hpp"
 
 #define NB_TESTS 60
@@ -147,13 +148,16 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     usrp1->set_time_source("external");
 
     std::cout << boost::format("Setting device timestamp to 100.000...") << std::endl;
-    usrp0->set_time_now(uhd::time_spec_t(100.000));
-    usrp1->set_time_now(uhd::time_spec_t(100.000));
-    usrp0->set_time_next_pps(uhd::time_spec_t());
+    usrp0->set_time_now(uhd::time_spec_t(time(0)));
+    usrp1->set_time_now(uhd::time_spec_t(time(0)));
 
     size_t num_acc_samps = 0; //number of accumulated samples
-//    while(num_acc_samps < total_num_samps){
-    while(test_time++ < NB_TESTS) {
+
+    std::chrono::high_resolution_clock::time_point t0 = std::chrono::high_resolution_clock::now();
+    std::chrono::high_resolution_clock::time_point t1;
+    std::chrono::duration<double, std::milli> time_span;
+
+    while(true) {
         //sleep off if gpsdo detected and time next pps already set
         //boost::this_thread::sleep(boost::posix_time::seconds(1));
 
@@ -167,17 +171,29 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         uhd::time_spec_t now0 = usrp0->get_time_now();
         uhd::time_spec_t now1 = usrp1->get_time_now();
 
-        std::cout << boost::format( "Actual hepiaB200 time : %f s")
-                     % (now0.get_real_secs()*1e0) << std::endl;
 
-        std::cout << boost::format( "Actual sinuxB200 time : %f s")
-                     % (now1.get_real_secs()*1e0) << std::endl;
+//        auto now2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+//    std::cout << now2 << std::endl;
+//        std::cout << boost::format( "Time in millis : %f ") % t1 << std::endl;
 
-        std::cout << boost::format( "Difference : %f us" ) % ((now1.get_real_secs() - now0.get_real_secs())*1e6)  << std::endl;
-//        std::cout << boost::format( "Actual hepiaB200 time : %u samples, %u full secs, %f frac secs, %ld tics")
-//                     % num_rx_samps1 % md1.time_spec.get_full_secs() % md1.time_spec.get_frac_secs() % md1.time_spec.get_tick_count(10000000000000) << std::endl;
-//
-        num_acc_samps += num_rx_samps0;
+        time_span = t1-t0;
+        t1 = std::chrono::high_resolution_clock::now();
+        if (time_span.count() > 500.0) {
+
+            std::cout << boost::format( "Actual hepiaB200 time : %f s")
+                         % (now0.get_real_secs()*1e0) << std::endl;
+
+            std::cout << boost::format( "Actual sinuxB200 time : %f s")
+                         % (now1.get_real_secs()*1e0) << std::endl;
+
+            std::cout << boost::format( "Difference : %f us" ) % ((now1.get_real_secs() - now0.get_real_secs())*1e6)  << std::endl;
+
+            std::cout << boost::format("Next PPS is %f s") % double(time(0))  << std::endl;
+            usrp0->set_time_next_pps(double(time(0)));
+            usrp1->set_time_next_pps(double(time(0)));
+
+            t0 = std::chrono::high_resolution_clock::now();
+        }
     }
 
     std::cout << boost::format("Last PPS: %f ") %  (usrp1->get_time_last_pps().get_real_secs()*1e6) << std::endl << std::endl;

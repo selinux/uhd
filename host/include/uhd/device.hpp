@@ -105,6 +105,9 @@ public:
      */
     virtual tx_streamer::sptr get_tx_stream(const stream_args_t &args) = 0;
 
+
+    virtual void test_lora_reg_write32(const uint32_t data) = 0;
+
     /*!
      * Receive and asynchronous message from the device.
      * \param async_metadata the metadata to be filled in

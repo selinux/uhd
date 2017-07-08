@@ -40,6 +40,7 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <complex>
+#include <chrono>
 
 #define NB_TESTS 60
 
@@ -123,18 +124,19 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
     usrp->set_rx_rate(rate);
     std::cout << boost::format("Actual hepiaB200 RX Rate: %f Msps...") % (usrp->get_rx_rate()) << std::endl << std::endl;
 
-    usrp->set_user_register(0, 0xBEEF, uhd::usrp::multi_usrp::ALL_MBOARDS);
-
     usrp->set_time_source("external");
 
     std::cout << boost::format("Setting device timestamp to 100.000...") << std::endl;
-    usrp->set_time_now(uhd::time_spec_t(100.000));
+    usrp->set_time_now(uhd::time_spec_t(time(0)));
 
     size_t num_acc_samps = 0; //number of accumulated samples
-//    while(num_acc_samps < total_num_samps){
+
+//    double time_now;
+
     while(true) {
         //sleep off if gpsdo detected and time next pps already set
         //boost::this_thread::sleep(boost::posix_time::seconds(1));
+        boost::this_thread::sleep(boost::posix_time::seconds(0.5));
 
         //receive a single packet
         size_t num_rx_samps = rx_stream->recv(
@@ -145,11 +147,18 @@ int UHD_SAFE_MAIN(int argc, char *argv[]){
         std::cout << boost::format( "Actual sinuxB200 time : %f s")
                      % (now.get_real_secs()*1e0) << std::endl;
 
-        usrp->set_lora_trig(7);
-        usrp->set_lora_trig(1);
-        usrp->set_lora_trig(0);
+//        time_now = time(0);
 
-        num_acc_samps += num_rx_samps;
+        if( usrp->get_time_now()-time(0) > 0.5 ) {
+            //std::cout << boost::format("Setting device timestamp to 100.000...%f") % 1.0 << std::endl;
+            std::cout << boost::format("Next time = %f s") % double(int(time(0)))  << std::endl;
+            //usrp->set_time_next_pps(uhd::time_spec_t());
+        }
+
+            //std::count << boost::format("[else] Actual = %f ,  Next time = %f s") % time_now % double(int(time_now)+1) << std::endl;
+//        }
+
+
     }
 
     std::cout << boost::format("Last PPS: %f ") %  (usrp->get_time_last_pps().get_real_secs()*1e6) << std::endl << std::endl;
